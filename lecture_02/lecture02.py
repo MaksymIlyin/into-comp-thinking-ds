@@ -34,7 +34,7 @@ def build_menu(names, values, calories):
 
 
 def max_val(to_consider, avail):
-    """Assumes toConsider a list of items, avail a weight.
+    """Assumes to_consider a list of items, avail a weight.
        Returns a tuple of the total value of a solution to the
        0/1 knapsack problem and the items of that solution"""
     if to_consider == [] or avail == 0:
@@ -57,3 +57,12 @@ def max_val(to_consider, avail):
         else:
             result = (without_val, without_to_take)
     return result
+
+
+if __name__ == '__main__':
+    names = ['wine', 'beer', 'pizza', 'burger',
+             'fries', 'cola', 'apple', 'donut', 'cake']
+    values = [89, 90, 95, 100, 90, 79, 50, 10, 40]
+    calories = [123, 154, 258, 354, 365, 150, 95, 195, 120]
+    foods = build_menu(names, values, calories)
+    test_all_greedy(foods, 1000)
