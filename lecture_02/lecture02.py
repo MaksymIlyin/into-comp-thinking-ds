@@ -101,6 +101,38 @@ def max_val(to_consider, avail):
     return result
 
 
+def fast_max_val(to_consider, avail, memo={}):
+    """Assumes to_consider a list of subjects, avail a weight
+    memo supplied by recursive calls.
+    Returns a tuple of the total value of a solution to the
+    0/1 knapsack problem and the subjects of that solution"""
+    if (len(to_consider), avail) in memo:
+        result = memo[(len(to_consider), avail)]
+    elif to_consider == [] or avail == 0:
+        result = (0, ())
+    elif to_consider[0].get_cost() > avail:
+        #Explore right branch only
+        result = fast_max_val(to_consider[1:], avail, memo)
+    else:
+        next_item = to_consider[0]
+        #Explore left branch
+        with_val, with_to_take = fast_max_val(
+            to_consider[1:], avail - next_item.get_cost(), memo
+        )
+        with_val += next_item.get_value()
+        #Explore right branch
+        without_val, without_to_take = fast_max_val(
+            to_consider[1:], avail, memo
+        )
+        #Choose better branch
+        if with_val > without_val:
+            result = (with_val, with_to_take + (next_item,))
+        else:
+            result = (without_val, without_to_take)
+    memo[(len(to_consider), avail)] = result
+    return result
+
+
 def test_max_val(foods, max_units, print_items=True):
     print(f'Use search tree to allocate {max_units} calories')
     val, taken = max_val(foods, max_units)
@@ -108,6 +140,16 @@ def test_max_val(foods, max_units, print_items=True):
     if print_items:
         for item in taken:
             print(f'\t{item}')
+
+def test_fast_max_val(foods, max_units, algorithm, print_items=True):
+    print('Menu contains', len(foods), 'items')
+    print('Use search tree to allocate', max_units,
+          'calories')
+    val, taken = algorithm(foods, max_units)
+    if print_items:
+        print('Total value of items taken =', val)
+        for item in taken:
+            print('   ', item)
 
 
 def build_bigger_menu(num_items, max_val, max_cost):
@@ -133,6 +175,9 @@ if __name__ == '__main__':
     # test_all_greedy(foods, 750)
     # print()
     # test_max_val(foods, 750)
-    for num_items in range(5, 65, 5):
-        items = build_bigger_menu(num_items, 90, 250)
-        test_max_val(items, 750, False)
+    # for num_items in range(5, 65, 5):
+    #     items = build_bigger_menu(num_items, 90, 250)
+    #     test_max_val(items, 750, False)
+    for numItems in (5, 10, 15, 20, 25, 30, 35, 40, 45, 50):
+       items = build_bigger_menu(numItems, 90, 250)
+       test_fast_max_val(items, 750, fast_max_val, False)
